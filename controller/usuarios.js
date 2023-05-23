@@ -2,8 +2,8 @@ const {response} = require('express');
 const bcryptjs = require('bcryptjs');
 
 const Usuario = require('../models/usuario');
-const { validarCampos } = require('../middlewares/validar-campos');
-const { emailExiste } = require('../helpers/db-validator');
+// const { validarCampos } = require('../middlewares/validar-campos');
+// const { emailExiste } = require('../helpers/db-validator');
 
 
 
@@ -19,9 +19,19 @@ const usuariosGet = (req, res = response) =>{
     })
 };
 
-const usuariosPut = (req, res = response) =>{
+const usuariosPut = async(req, res = response) =>{
 
-    const id = req.params.id;
+    const {id} = req.params.id;
+    const { password, google, correo, ...resto } = req.body;
+
+    // Validar contra base de datos
+    if( password ){
+        // Encriptar contraseña
+        const salt = bcryptjs.genSaltSync(10);
+        resto.password = bcryptjs.hashSync(password, salt);
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate(id, resto);
 
     res.json({
         msg: 'put API - usuarios put',
