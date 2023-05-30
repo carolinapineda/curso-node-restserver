@@ -3,14 +3,18 @@ const {Router} = require('express');
 const { usuariosGet, usuariosPut, usuariosPost, usuariosDelete, usuariosPatch } = require('../controller/usuarios');
 const { check } = require('express-validator');
 const { validarCampos } = require('../middlewares/validar-campos');
-const { esRoleValido, emailExiste } = require('../helpers/db-validator');
+const { esRoleValido, emailExiste, existeUsuarioPorId } = require('../helpers/db-validator');
 
 
 const router = Router();
 
 router.get('/', usuariosGet);
 
-router.put('/:id', usuariosPut);
+router.put('/:id', [
+    check('id', 'No es un id valido').isMongoId(),
+    check('id').custom(existeUsuarioPorId),
+    validarCampos
+ ] ,usuariosPut);
 
 router.post('/', [
     /* isEmpty() significa que debe de estar vacio pero al momento de ponerle el not() quiere decir que no debe de estar vacio
