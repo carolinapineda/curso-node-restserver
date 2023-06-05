@@ -1,10 +1,21 @@
 
 const {Router} = require('express');
-const { usuariosGet, usuariosPut, usuariosPost, usuariosDelete, usuariosPatch } = require('../controller/usuarios');
 const { check } = require('express-validator');
-const { validarCampos } = require('../middlewares/validar-campos');
+
+const {
+    validarCampos,
+    validarJWT,
+    esAdminRole,
+    tieneRole
+} = require('../middlewares');
+
 const { esRoleValido, emailExiste, existeUsuarioPorId } = require('../helpers/db-validator');
 
+const { usuariosGet, 
+        usuariosPut, 
+        usuariosPost, 
+        usuariosDelete, 
+        usuariosPatch } = require('../controller/usuarios');
 
 const router = Router();
 
@@ -21,6 +32,7 @@ router.post('/', [
     al ponerle el not se le estaria llevando la contraria al isEmpty*/
     check('nombre', 'El nombre es obligatorio').not().isEmpty(),
     check('password', 'El password debe de ser mas de 6 letras').isLength({min:6}),
+    check('correo', 'El correo no es válido').isEmail(),
     check('correo').custom(emailExiste),
     // check('rol', 'No ers un rol valido').isIn(['ADMIN_ROLE', 'USER_ROLE']),
     check('rol').custom(esRoleValido),
@@ -28,8 +40,11 @@ router.post('/', [
 ] ,usuariosPost);
 
 router.delete('/:id', [
-    check('id', 'No es un id valido').isMongoId(),
-    check('id').custom(existeUsuarioPorId), 
+    validarJWT,
+    // esAdminRole,
+    tieneRole('ADMIN_ROLE', 'VENTAR_ROLE','OTRO_ROLE'),
+    check('id', 'No es un ID válido').isMongoId(),
+    check('id').custom( existeUsuarioPorId ),
     validarCampos,
 ], usuariosDelete);
 

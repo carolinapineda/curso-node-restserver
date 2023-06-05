@@ -7,12 +7,9 @@ const Usuario = require('../models/usuario');
 // const { emailExiste } = require('../helpers/db-validator');
 
 
-
-
 const usuariosGet = async(req = request, res = response) =>{
 
     // const {q,nombre} = req.query;
-
     const {limite = 5, desde=0} = req.query;
     const query = {estado: true};
 
@@ -49,6 +46,7 @@ const usuariosPut = async(req, res = response) =>{
       
 };
 
+
 const  usuariosPost = async(req, res = response) =>{
 
     // const errors = validationResult(req);
@@ -56,12 +54,8 @@ const  usuariosPost = async(req, res = response) =>{
     //     return res.status(400).json(errors);
     // }
 
-    
-
     const {nombre, correo, password , rol} = req.body;
     const usuario = new Usuario({nombre, correo, password, rol});
-
-    
 
     // Encriptar la contraseña
     const salt = bcryptjs.genSaltSync();
@@ -78,11 +72,18 @@ const  usuariosPost = async(req, res = response) =>{
 const usuariosDelete = async(req, res = response) =>{
 
     const {id} = req.params;
+    const { _id, password, google, correo, ...resto } = req.body;
 
     // Fisicamente lo borramos 
     // const usuario = await Usuario.findByIdAndDelete(id);
 
-    const usuario = await Usuario.findByIdAndUpdate(id, {estado:false});
+    if ( password ) {
+        // Encriptar la contraseña
+        const salt = bcryptjs.genSaltSync();
+        resto.password = bcryptjs.hashSync( password, salt );
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate( id, resto );
 
     res.json(usuario);
 }
