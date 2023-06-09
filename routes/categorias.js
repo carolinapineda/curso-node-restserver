@@ -2,7 +2,8 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 
 const { validarJWT, validarCampos } = require('../middlewares');
-const { crearCategoria } = require('../controller/categorias');
+const { crearCategoria, ObtenerCategorias, actualizarCategoria, obtenerCategoriaId } = require('../controller/categorias');
+const { existeCategoria } = require('../helpers/db-validator');
 
 const router = Router();
 
@@ -10,16 +11,18 @@ const router = Router();
 */
 
 // Obtener todas las categorias - publico
-router.get('/', (req, res) => {
+router.get('/',[
+    ObtenerCategorias
+], (req, res) => {
     res.json('get');
 });
 
 // Obtener una categoria por id - publico
 router.get('/:id',[
-    check('id').custom( existecategoria ),
-], (req, res) => {
-    res.json('get - id');
-});
+    validarJWT,
+    check('id').custom(existeCategoria),
+    validarCampos
+], obtenerCategoriaId);
 
 // Crear categoria - privado - cualquier persona con un  token valido
 router.post('/', [
@@ -29,9 +32,9 @@ router.post('/', [
 ], crearCategoria);
 
 // Actualizar - privado - cualquiera con token valido
-router.put('/:id', (req, res) => {
-    res.json('put');
-});
+router.put('/:id', [
+    validarJWT,
+], actualizarCategoria);
 
 // Borrar una categoria - Admin
 router.delete('/:id', (req, res) => {
