@@ -72,18 +72,13 @@ const  usuariosPost = async(req, res = response) =>{
 const usuariosDelete = async(req, res = response) =>{
 
     const {id} = req.params;
-    const { _id, password, google, correo, ...resto } = req.body;
 
     // Fisicamente lo borramos 
     // const usuario = await Usuario.findByIdAndDelete(id);
 
-    if ( password ) {
-        // Encriptar la contraseña
-        const salt = bcryptjs.genSaltSync();
-        resto.password = bcryptjs.hashSync( password, salt );
-    }
 
-    const usuario = await Usuario.findByIdAndUpdate( id, resto );
+    // Se cambia el estado del usuario a false 
+    const usuario = await Usuario.findByIdAndUpdate( id, {estado: false});
 
     res.json(usuario);
 }

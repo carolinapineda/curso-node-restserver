@@ -31,10 +31,10 @@ const existeUsuarioPorId = async (id)=>{
     }
 }
 
-const existeCategoria = async(id) => {
+const existeCategoriaPorId = async (id) => {
 
-    const existeCategoria = await Categoria.findById(id);
-    if(!existeCategoria){
+    const existeCategoriaPorId = await Categoria.findById(id);
+    if(!existeCategoriaPorId){
         throw new Error(`La categoria ${id} no existe`)
     }
 }
@@ -43,5 +43,5 @@ module.exports = {
     esRoleValido,
     emailExiste,
     existeUsuarioPorId,
-    existeCategoria
+    existeCategoriaPorId
 } 

@@ -1,19 +1,16 @@
-const { response } = require('express');
+const { response, request } = require('express');
 const { Categoria } = require('../models');
 
 // Obtener categoria - populate {}
 const obtenerCategoriaId = async( req = request, res= response) => {
 
-    const [id, categorias] = await Promise.all([
-        Categoria.countDocuments(query),
-        Categoria.find(query)
-            .populate('usuario', 'nombre')
-    ]);
-
-    res.json({
-        id,
-        categorias
-    });
+    const {id} = req.params;
+    const categoria = await Categoria.findById(id)
+                                    .populate('usuario', 'nombre')
+                             
+   res.json({
+        categoria
+   })
 
 }
 
@@ -41,7 +38,7 @@ const ObtenerCategorias = async( req = request, res= response) => {
 
 
 
-
+// Crear Categorias
 const crearCategoria = async(req, res = response) => {
     
     const nombre = req.body.nombre.toUpperCase();
@@ -82,10 +79,23 @@ const actualizarCategoria = async(req = request, res = response) => {
 
 // Borrar categoria(cambiar el estado a false) - solicitar id
 
+const borrarCategoria = async(req = request, res = respose) => {
+
+    const {id} = req.params;
+    
+    // Se cambia el estado del usuario a false 
+    const categoria = await Categoria.findByIdAndUpdate( id, {estado: false});
+
+    res.json({
+        categoria
+    })
+}
 
 
 module.exports = {
     crearCategoria,
     ObtenerCategorias,
-    actualizarCategoria
+    obtenerCategoriaId,
+    actualizarCategoria,
+    borrarCategoria
 }
