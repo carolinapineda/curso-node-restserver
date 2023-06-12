@@ -9,17 +9,18 @@ class Server{
         this.app = express();
         this.port = process.env.PORT;
 
-        this.usuariosPath = '/api/usuarios';
-        this.authPath = '/api/auth';
+        this.paths = {
+            auth: '/api/auth',
+            categorias: '/api/categorias',
+            usuarios: '/api/usuarios',
+            
+        }
 
         // Conectar base de datos
         this.conectarDB();
 
         // Middlewares
         this.middlewares();
-
-        // Lectura y parceo del body
-        this.app.use(express.json());
 
         // rUTAS DE MI APLICACION
         this.routes();
@@ -32,16 +33,21 @@ class Server{
 
     middlewares() {
 
+        // CORS
         this.app.use(cors());
+
+        // Lectura y parseo del body
+        this.app.use( express.json() );
+
         // Directorio publico
         this.app.use(express.static('public'));
     }
 
     routes() {
        
-        this.app.use(this.authPath, require('../routes/auth'))
-        this.app.use(this.usuariosPath, require('../routes/usuarios'))
-        
+        this.app.use(this.paths.auth, require('../routes/auth'))
+        this.app.use(this.paths.categorias, require('../routes/categorias'))
+        this.app.use(this.paths.usuarios, require('../routes/usuarios'))
     }
 
     listen(){
