@@ -10,7 +10,7 @@ const obtenerCategoriaId = async( req = request, res= response) => {
                              
    res.json({
         categoria
-   })
+   }) 
 
 }
 
