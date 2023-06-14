@@ -1,6 +1,17 @@
 const { response, request } = require('express');
-const { Producto } = require("../models/producto");
+const { Producto } = require("../models");
 
+
+// Obtener productos por id 
+const obtenerProductosId = async(req, res = response) => {
+
+    const {id} = req.params;
+
+    const producto = await Producto.findById(id)
+                                   .populate('usuario', 'nombre')
+
+    res.json(producto);
+};
 
 
 // Obtener Productos 
@@ -10,36 +21,39 @@ const obtenerProductos = async(req, res = respose) => {
     const query = { estado:true };
 
     const [total, productos] = await Promise.all([
-        Producto.countDocument(query),
+        Producto.countDocuments(query),
         Producto.find(query)
                 .skip(Number(desde))
                 .limit(Number(limite))
+                .populate('usuario', 'nombre')
 
     ]);
 
     res.json({
-        productos,
-        total
+        total,
+        productos
+        
     })
 };
 
 
 // Crear Producto
-const crearProducto = async(req, res = response) => {
+const crearProducto = async(req = request, res = response) => {
 
-    const { estado, usuario, ...body } = req.body;
+    const { estado, usuario, ...total } = req.body;
 
-    const productoDB = await Producto.findOne({ nombre: body.nombre});
+    const productoDB = await Producto.findOne({nombre: total.nombre});
 
     if( productoDB ){
         return res.status(400).json({
-            msg: `El producto ${ productoDB } ya existe `
+            msg: `El producto ${ productoDB.nombre } ya existe `
         })
     }
 
     // Generar la data a guardar 
     const data = {
-        nombre, 
+        ...total,
+        nombre: total.nombre.toUpperCase(),
         usuario: req.usuario._id,
     }
 
@@ -52,9 +66,38 @@ const crearProducto = async(req, res = response) => {
 };
 
 
+// Actualizar Producto
+const actualizarProducto = async(req, res = response) => {
+
+    const {id} = req.params;
+    const { estado, usuario, ...resto} = req.body;
+
+    resto.nombre = resto.nombre.toUpperCase();
+
+    const producto = await Producto.findByIdAndUpdate(id, resto, {new:true});
+
+    res.json(producto);
+    
+};
+
+
+// Borrar productos 
+const borrarProductos = async(req, res = respose) => {
+
+    const {id} = req.params;
+
+    const producto = await Producto.findByIdAndUpdate(id, {estado:false});
+
+    res.json(producto);
+}
+
+
 
 
 module.exports = {
+    obtenerProductosId,
     obtenerProductos,
-    crearProducto
+    crearProducto,
+    actualizarProducto,
+    borrarProductos
 }
