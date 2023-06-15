@@ -1,5 +1,6 @@
 const { response, request } = require('express');
 const { Producto } = require("../models");
+const { Categoria } = require("../models");
 
 
 // Obtener productos por id 
@@ -20,7 +21,7 @@ const obtenerProductos = async(req, res = respose) => {
     const { limite = 5, desde = 0 } = req.query;
     const query = { estado:true };
 
-    const [total, productos] = await Promise.all([
+    const [ total, productos] = await Promise.all([
         Producto.countDocuments(query),
         Producto.find(query)
                 .skip(Number(desde))
@@ -28,6 +29,10 @@ const obtenerProductos = async(req, res = respose) => {
                 .populate('usuario', 'nombre')
 
     ]);
+
+    // const { nombre } = req.body.categoria;
+    // const categoria = await Categoria.nombre.findOne({nombre:nombre})
+
 
     res.json({
         total,
